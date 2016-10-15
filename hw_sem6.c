@@ -1,14 +1,29 @@
 // на убунте ускорение не наблюдается
 
+/*
+ * Я забыл про одну важную особенность ф-и clock:
+ * http://stackoverflow.com/questions/2962785/c-using-clock-to-measure-time-in-multi-threaded-programs
+ * 
+ * Ровно поэтому вы получали ускорение равное примерно 1 и меньше (меньше, т.к. ресурсы тратятся также в ходе переключения контекстов между нитями).
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
 
-
 #define NUMBERS 100000000
-#define Threads 4
+/*
+ * FIXIT Называйте переменные в одном стиле: если назвали первую константу NUMBERS, то 
+ * следующую назовите также заглавными THREADS_COUNT.
+ * Откройте 1ю презентацию и посмотрите советы про стиль именования различных переменных и ф-й.
+ */
+#define Threads 1
 
+/*
+ * FIXIT:
+ * В названии явно не хватает Task:
+ */
 struct ForThread {
 	double M;
 	double D;
@@ -20,6 +35,10 @@ void* my_thread(struct ForThread* Thr)
 	int i;
 	double sum1 = 0, sum2 = 0;
 	for(i = 0; i < (NUMBERS / Threads); i++)
+/*
+ * Лучше так: sum1 += Thr->a[i];
+ * sum1, sum2 - не лучшие название, т.к. из них мало понятно, что именно за суммы вы вычисляете
+ */
 		sum1 = sum1 + Thr->a[i];
  
 	Thr->M = sum1 / (NUMBERS / Threads);
@@ -29,7 +48,6 @@ void* my_thread(struct ForThread* Thr)
 	Thr->D = sum2 / (NUMBERS / Threads);
 	return NULL;
 }
-
 
 int main()
 {
@@ -65,5 +83,4 @@ int main()
 	printf("D = %.8f\n", D);
 	printf("Elapsed: %.8f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 	return 0;
-
 }
