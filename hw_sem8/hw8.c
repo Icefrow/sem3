@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 
-#define TABLE_LIMIT 2
+#define TABLE_LIMIT 1
 #define MAX_TYPES_OF_DISHES 20
 #define MAX_LETTERS_OF_TYPE 20
 
@@ -63,19 +63,19 @@ int main()
 	dishes = fopen("dishes.txt","r");
 
 	while( fscanf(washer, "%s %*c %lf\n", dishWasher[i].type, &dishWasher[i].time) != EOF)
-		++i; //считываем мойку
+		++i;
 
-	COUNT_OF_TYPES = i; // кол-во типов посуды
+	COUNT_OF_TYPES = i;
 
 	i = 0;
 	while( fscanf(wiper, "%s %*c %lf\n", dishWiper[i].type, &dishWiper[i].time) != EOF)
-		++i; //считываем протирку
+		++i; 
 
 	pipe(fd);
-	pid_t t = fork(); // создаем дочерний процесс 
-	if(t > 0) //мойщик
+	pid_t t = fork();  
+	if(t > 0)
 	{
-		while( fscanf(dishes, "%s %*c %d\n", washerType, &count) != EOF) // даем посуду мойщику
+		while( fscanf(dishes, "%s %*c %d\n", washerType, &count) != EOF)
 		{
 			for(i = 0; i < COUNT_OF_TYPES; i++)
 				if( strcmp(washerType, dishWasher[i].type) == 0 )
@@ -83,9 +83,9 @@ int main()
 			for(j = 0; j < count; j++)
 			{
 				ChangeSem(semid, -1);
-				sleep(dishWasher[i].time); //моем моем моем
+				sleep(dishWasher[i].time);
 				printf("Мойщик: помыл %s за %.1lf секунд\n", washerType, dishWasher[i].time);
-				write(fd[1], washerType, MAX_LETTERS_OF_TYPE); // ложим на стол
+				write(fd[1], washerType, MAX_LETTERS_OF_TYPE); 
 			}
 		}
 		printf("Мойщик: я всё\n");
@@ -93,22 +93,22 @@ int main()
 		wait(&status);
 	}
 
-	if(t == 0) //протиральщик
+	if(t == 0)
 	{
-		read(fd[0], wiperType, MAX_LETTERS_OF_TYPE); // берем посуду со стола
+		read(fd[0], wiperType, MAX_LETTERS_OF_TYPE);
 		while( strcmp(wiperType,"end\0") != 0)
 		{
 			for(i2 = 0; i2 < COUNT_OF_TYPES; i2++)
 				if( strcmp(wiperType, dishWiper[i2].type) == 0 )
 					break;
-			sleep(dishWiper[i2].time); //протираеееем
+			sleep(dishWiper[i2].time);
 			ChangeSem(semid, 1);
 			printf("Протир: протер %s за %.1lf секунд\n", wiperType, dishWiper[i2].time);
-			read(fd[0], wiperType, MAX_LETTERS_OF_TYPE); // берем посуду со стола
+			read(fd[0], wiperType, MAX_LETTERS_OF_TYPE); 
 		}
 		printf("Протир: я тоже всё\n");
 	}
-	semctl(semid, IPC_RMID, NULL);
+	semctl(semid, IPC_RMID, 0);
 	
 	return 0;
 }
