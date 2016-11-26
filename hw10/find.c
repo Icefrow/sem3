@@ -24,8 +24,14 @@ void DFS(char* path)
 			printf("%s \n",path);
 			exit(-1);
 		}
+		/*
+     * Уверен, что для этой 4ки существуется какая-то константа уже.
+     */
 		if( (ent->d_type == 4) && (strcmp(ent->d_name,".") != 0) && (strcmp(ent->d_name,"..") != 0) )
 		{
+/*
+ * Не запускал, чтобы проверить, но надеюсь это работает. Видно, что разбирались с рекурсией.
+ */
 			a = telldir(dir);
 			strcpy(cpypath, path);
 			strcat(path,ent->d_name);

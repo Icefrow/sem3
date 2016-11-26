@@ -62,6 +62,10 @@ int main()
 		printf("%d ", dir+1);
 		Pop(&my_queue);
 		for(i = 0; i < 9; i++)
+    /*
+     * Можно писать просто if(a[dir][i]), что
+     * равносильно if(a[dir][i] != 0)
+     */
 			if(a[dir][i] == 1)
 				Push(&my_queue,i);
 	}
