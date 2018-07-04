@@ -1,0 +1,40 @@
+module fifo
+(
+	input clk,
+	input rst_,
+	input in_val,
+	input [WIDTH - 1 : 0] in_dat,
+	output reg full,
+	output reg out_val,
+	output reg [WIDTH - 1 : 0] out_dat,
+	input out_ack
+)
+parameter WIDTH = 32;
+parameter DEPTH = 8;
+
+reg [WIDTH - 1 : 0] mem [DEPTH - 1 : 0];
+reg [DEPTH - 1 : 0] head;
+reg [DEPTH - 1 : 0] tail;
+reg [DEPTH - 1 : 0] num;
+reg empty;
+
+//tail
+always @ (posedge clk)
+begin
+	if(~rst_)
+	begin
+		tail <= 0;
+		full <= 0;
+		out_val <= 0;
+	end
+	else begin
+		mem[tail] <= ~in_val ? mem[tail] : ~full ? in_dat : mem[tail];
+		tail <= ~in_val ? tail : full ? tail : (tail == DEPTH - 1) ? 0 : tail + 1;
+		out_val <= (head == tail) ? 0 : 1;
+		full <= (head == 0 && tail == DEPTH - 1) ? 1 : (tail >= head) ? 0 : (head - tail == 1) ? 1 : 0;
+
+//head		
+always @ (posedge clk)
+begin
+	head <= ~rst_ ? 0 : ~out_ack ? head : ~out_val ? head : (head == DEPTH - 1) ? 0 : head + 1;
+	out_dat[head] <= ~out_val ? out_dat[head] : 
